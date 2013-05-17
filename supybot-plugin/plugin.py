@@ -36,14 +36,48 @@ import supybot.ircmsgs as ircmsgs
 import supybot.ircutils as ircutils
 import supybot.callbacks as callbacks
 
+import sqlalchemy
+import sqlalchemy.orm
+
 import re
 
-class GroupStatusDB():
-    def __init__(self):
-        pass
+import statusdb
+reload(statusdb)
 
-    def add(self, tgt, nick, payload):
-        print "Adding %s,%s,%s"%(tgt, nick, payload)
+class GroupStatusDB():
+    def init_db(self, irc):
+        if self.db_initialized: return True
+
+        cs = str(conf.supybot.plugins.GroupStatus.get('databaseConnectString'))
+        if cs == "":
+            irc.error("No databaseConnectString configured yet")
+            return False
+        try:
+            engine = sqlalchemy.create_engine(cs)
+            engine.execute('select 1').scalar()
+            self.Session = sqlalchemy.orm.sessionmaker(bind=engine)
+        except Exception, e:
+            print e
+            irc.error("An error occurred connecting to the db.  There might be something on the console.")
+            return False
+        self.db_initialized = True
+        return True
+
+    def __init__(self):
+        self.db_initialized = False
+
+    def add(self, irc, tgt, nick, payload):
+        if not self.init_db(irc): return
+
+        try:
+            m = statusdb.DBMessage(tgt, nick, payload)
+            session = self.Session()
+            session.add(m)
+            m.tag(session)
+            session.commit()
+        except Exception, e:
+            print e
+            irc.error("An error occurred.  There might be something on the console.")
 
 class GroupStatus(callbacks.Plugin):
     def __init__(self, irc):
@@ -61,10 +95,11 @@ class GroupStatus(callbacks.Plugin):
         if irc.isChannel(msg.args[0]):
             (tgt, payload) = msg.args
             nick = msg.nick
-            if not re.match('status:', payload, re.IGNORECASE): return
+            m = re.match('status:\s*(.*)', payload, re.IGNORECASE)
+            if m is None: return
             if not self._checkAuthed(irc, nick):
-                irc.error("You need to be in one of the authentication channels for your message to get recorded.  Please ask the bot operator which channels these are.")
+                irc.error("You need to be in one of the authentication channels for your message to get recorded.  These are: %s"%(str(conf.supybot.plugins.GroupStatus.get('authChannel')),))
             else:
-                self.db.add(tgt, nick, payload)
+                self.db.add(irc, tgt, nick, m.group(1))
 
 Class = GroupStatus
