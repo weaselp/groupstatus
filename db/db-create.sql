@@ -9,7 +9,7 @@ GRANT SELECT ON config TO public;
 
 CREATE TABLE message (
     message_id  SERIAL  PRIMARY KEY,
-    ts          TIMESTAMP NOT NULL,
+    ts          TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     channel     TEXT NOT NULL,
     person      TEXT NOT NULL,
     message     TEXT NOT NULL
@@ -21,7 +21,8 @@ GRANT SELECT ON message TO public;
 
 CREATE TABLE tag (
     tag_id      SERIAL  PRIMARY KEY,
-    tag         TEXT NOT NULL
+    tag         TEXT NOT NULL,
+    UNIQUE(tag)
 );
 CREATE INDEX tag_tag_idx ON tag(tag);
 GRANT SELECT ON tag TO public;
