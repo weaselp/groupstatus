@@ -22,6 +22,7 @@ GRANT SELECT ON message TO public;
 CREATE TABLE tag (
     tag_id      SERIAL  PRIMARY KEY,
     tag         TEXT NOT NULL,
+    url         TEXT,
     UNIQUE(tag)
 );
 CREATE INDEX tag_tag_idx ON tag(tag);

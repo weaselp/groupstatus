@@ -21,9 +21,16 @@ class DBTag(Base):
 
     tag_id = sqlalchemy.Column(sqlalchemy.types.Integer, primary_key=True)
     tag = sqlalchemy.Column(sqlalchemy.types.String)
+    url = sqlalchemy.Column(sqlalchemy.types.String)
 
-    def __init__(self, tag):
+    def __init__(self, tag, url=None):
         self.tag = tag
+        if url is not None:
+            self.url = url
+        else:
+            m = re.match('#([0-9]+)$', tag)
+            if m:
+                self.url = 'http://bugs.torproject.org/%s'%(m.group(1))
 
 class DBMessage(Base):
     __tablename__ = 'message'
@@ -44,7 +51,7 @@ class DBMessage(Base):
 
     def tag(self, session, tags=None):
         if tags is None:
-            tags = re.findall('#\S*', self.message)
+            tags = re.findall('#[a-zA-Z0-9_+/&-]+', self.message)
 
         done = {}
         for t in tags:

@@ -79,6 +79,23 @@ class GroupStatusDB():
             print e
             irc.error("An error occurred.  There might be something on the console.")
 
+    def update_url(self, irc, tag, url):
+        if not self.init_db(irc): return
+
+        session = self.Session()
+
+        rows = session.query(statusdb.DBTag).filter_by(tag=tag)[0:1]
+        if len(rows) == 0:
+            irc.error("Tag does not exist.")
+            return False
+
+        dbo = rows[0]
+        session.add(dbo)
+        dbo.url = url
+        session.commit()
+        return True
+
+
 class GroupStatus(callbacks.Plugin):
     def __init__(self, irc):
         self.__parent = super(GroupStatus, self)
@@ -101,5 +118,17 @@ class GroupStatus(callbacks.Plugin):
                 irc.error("You need to be in one of the authentication channels for your message to get recorded.  These are: %s"%(str(conf.supybot.plugins.GroupStatus.get('authChannel')),))
             else:
                 self.db.add(irc, tgt, nick, m.group(1))
+                irc.reply("Thanks for your update.")
+
+    def tagurl(self, irc, msg, args, tag, url):
+        """<tag> <url>
+
+        Assigns URL <url> to tag <tag>.  The tag must already exist.  Updates must happen in public channels.
+        """
+        if not irc.isChannel(msg.args[0]):
+            irc.error("Try it in public.")
+        elif self.db.update_url(irc, tag, url):
+            irc.reply("Got it.")
+    tagurl = wrap(tagurl, ['anything', 'anything'])
 
 Class = GroupStatus
