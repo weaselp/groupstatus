@@ -29,8 +29,8 @@ CREATE INDEX tag_tag_idx ON tag(tag);
 GRANT SELECT ON tag TO public;
 
 CREATE TABLE message_tag (
-    message_id INTEGER NOT NULL REFERENCES message(message_id),
-    tag_id     INTEGER NOT NULL REFERENCES tag(tag_id),
+    message_id INTEGER NOT NULL REFERENCES message(message_id) ON DELETE CASCADE,
+    tag_id     INTEGER NOT NULL REFERENCES tag(tag_id) ON DELETE CASCADE,
     PRIMARY KEY (message_id, tag_id)
 );
 CREATE INDEX message_tag_message_id ON message_tag(message_id);
