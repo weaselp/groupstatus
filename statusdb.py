@@ -51,7 +51,7 @@ class DBMessage(Base):
 
     def tag(self, session, tags=None):
         if tags is None:
-            tags = re.findall('#[a-zA-Z0-9_+/&-]+', self.message)
+            tags = re.findall('#[a-zA-Z0-9_+/-]+', self.message)
 
         done = {}
         for t in tags:

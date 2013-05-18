@@ -1,0 +1,27 @@
+<h1>Status for tag {{ tag.tag }} </h1>
+
+<a href="../">..</a><br />
+
+{% if tag.url %}
+  <a href="{{tag.url}}">{{tag.url}}</a>
+{% endif %}
+
+<ul>
+{% for m in msgs %}
+  <li>
+    {{ m.msgHTML|safe }}
+    <small> -- <a href="/person/{{ m.person }}">{{ m.person }}</a>, {{ m.ts|timesince }} ago in {{ m.channel }}</small>
+    <!--
+    (<small>
+    {% for t in m.tags %}
+      {% if t.url %}<a href="{{t.url}}">{{t.tag}}</a>
+      {% else %} {{ t.tag }}
+      {% endif %}
+    {% endfor %}
+    </small>)
+    -->
+  </li>
+{% endfor %}
+</ul>
+
+
