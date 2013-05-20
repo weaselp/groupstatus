@@ -118,7 +118,8 @@ class GroupStatus(callbacks.Plugin):
                 irc.error("You need to be in one of the authentication channels for your message to get recorded.  These are: %s"%(str(conf.supybot.plugins.GroupStatus.get('authChannel')),))
             else:
                 self.db.add(irc, tgt, nick, m.group(1))
-                irc.reply("Thanks for your update.")
+                irc.queueMsg(ircmsgs.notice(tgt, "Recording %s's status update at %s."%(nick, 'https://gs.torproject.org/')))
+                irc.noReply()
 
     def tagurl(self, irc, msg, args, tag, url):
         """<tag> <url>
