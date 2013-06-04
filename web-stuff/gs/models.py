@@ -47,7 +47,7 @@ class DBTag(statusdb.DBTag):
 class DBMessage(statusdb.DBMessage):
     def msgHTML(self):
         msg = conditional_escape(self.message)
-        msg = re.sub('#([a-zA-Z0-9_+/-]+)', '<a href="/tag/\\1">\g<0></a>',
+        msg = re.sub('(?<!&)#([a-zA-Z0-9_+/-]+)', '<a href="/tag/\\1">\g<0></a>',
             msg)
         return msg
 
