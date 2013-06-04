@@ -70,6 +70,12 @@ class GroupStatusDB():
         if not self.init_db(irc): return
 
         try:
+            payload.decode('utf-8')
+        except UnicodeDecodeError, e:
+            irc.error("Your message appears to not be UTF-8 encoded.")
+            return False
+
+        try:
             m = statusdb.DBMessage(tgt, nick, payload)
             session = self.Session()
             session.add(m)
@@ -78,6 +84,8 @@ class GroupStatusDB():
         except Exception, e:
             print e
             irc.error("An error occurred.  There might be something on the console.")
+            return False
+        return True
 
     def update_url(self, irc, tag, url):
         if not self.init_db(irc): return
@@ -117,9 +125,9 @@ class GroupStatus(callbacks.Plugin):
             if not self._checkAuthed(irc, nick):
                 irc.error("You need to be in one of the authentication channels for your message to get recorded.  These are: %s"%(str(conf.supybot.plugins.GroupStatus.get('authChannel')),))
             else:
-                self.db.add(irc, tgt, nick, m.group(1))
-                irc.queueMsg(ircmsgs.notice(tgt, "Recording %s's status update at %s."%(nick, 'https://gs.torproject.org/')))
-                irc.noReply()
+                    if self.db.add(irc, tgt, nick, m.group(1)):
+                        irc.queueMsg(ircmsgs.notice(tgt, "Recording %s's status update at %s."%(nick, 'https://gs.torproject.org/')))
+                    irc.noReply()
 
     def tagurl(self, irc, msg, args, tag, url):
         """<tag> <url>
