@@ -65,7 +65,7 @@ class DBMessage(Base):
     __tablename__ = 'message'
 
     message_id = sqlalchemy.Column(sqlalchemy.types.Integer, primary_key=True)
-    ts = sqlalchemy.Column(sqlalchemy.types.DateTime, default=datetime.datetime.utcnow)
+    ts = sqlalchemy.Column(sqlalchemy.types.DateTime, default=datetime.datetime.now)
     channel = sqlalchemy.Column(sqlalchemy.types.String)
     person = sqlalchemy.Column(sqlalchemy.types.String)
     message = sqlalchemy.Column(sqlalchemy.types.String)
